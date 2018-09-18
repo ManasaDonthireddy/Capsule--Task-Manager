@@ -1,0 +1,118 @@
+
+
+******************* Parent Task *******************
+
+CREATE TABLE [dbo].[Parent_Task](
+Parent_ID CHAR(4) PRIMARY KEY,
+Parent_Task VARCHAR(30))
+
+******************* Task *******************
+
+CREATE TABLE [dbo].[Task](
+Task_ID CHAR(4) PRIMARY KEY,
+Parent_ID CHAR(4),
+Task VARCHAR(80),
+IsActive VARCHAR(80),
+Start_Date DATE,
+End_Date DATE,
+Priority INT)
+
+
+******************* Parent_id Foreign Key CONSTANT *******************
+
+ALTER TABLE Task ADD CONSTRAINT FK_parent_id FOREIGN KEY (Parent_ID) REFERENCES Parent_Task(Parent_ID);
+
+
+******************* PROCS *******************
+
+USE [TaskManager]
+GO
+/****** Object:  StoredProcedure [dbo].[Get_Parent_Task]    Script Date: 9/10/2018 1:31:06 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].[Get_Parent_Task]
+AS
+BEGIN
+SELECT Distinct * FROM [dbo].[Parent_Task];
+END
+
+
+USE [TaskManager]
+GO
+/****** Object:  StoredProcedure [dbo].[Get_Task_Details]    Script Date: 9/10/2018 1:31:23 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].[Get_Task_Details]
+AS
+BEGIN
+SELECT Distinct * FROM [dbo].[Task];
+END
+
+
+
+USE [TaskManager]
+GO
+/****** Object:  StoredProcedure [dbo].[INSERT_TASK_DETAILS]    Script Date: 9/10/2018 1:32:02 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].[INSERT_TASK_DETAILS]
+(
+
+@Task_ID INT,
+@Parent_ID INT,
+@Task VARCHAR(500),
+@Start_Date DATETIME,
+@End_Date DATETIME,
+@Priority INT
+)
+
+AS
+
+BEGIN
+
+	IF(@Task_ID=0)
+		BEGIN
+
+			INSERT INTO Task(Task_ID,Parent_ID,Task,IsActive,Start_Date,End_Date,Priority)VALUES ((select COUNT(*)+1 from Task),@Parent_ID,@Task,1,@Start_Date,@End_Date,@Priority);
+			
+		END
+
+	ELSE 
+		BEGIN
+			
+		  UPDATE Task SET Parent_ID=@Parent_ID,Task=@Task,Start_Date=@Start_Date,End_Date=@End_Date,Priority=@Priority
+		  WHERE Task_ID = @Task_ID;
+
+
+		END
+END 
+
+USE [TaskManager]
+GO
+/****** Object:  StoredProcedure [dbo].[UPDATE_END_TASK]    Script Date: 9/10/2018 1:32:12 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].[UPDATE_END_TASK]
+(
+@Task_ID INT,
+@End_Date DATETIME
+)
+
+AS
+
+BEGIN
+
+	UPDATE Task SET End_Date=@End_Date,IsActive=0 WHERE Task_ID = @Task_ID;
+
+END 
+ 
+
+
